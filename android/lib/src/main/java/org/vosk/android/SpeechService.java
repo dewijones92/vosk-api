@@ -41,6 +41,7 @@ public class SpeechService {
     private RecognizerThread recognizerThread;
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    IOnAudioDataReceived onAudioDataReceivedCallback;
 
     /**
      * Creates speech service. Service holds the AudioRecord object, so you
@@ -48,9 +49,10 @@ public class SpeechService {
      *
      * @throws IOException thrown if audio recorder can not be created for some reason.
      */
-    public SpeechService(Recognizer recognizer, float sampleRate) throws IOException {
+    public SpeechService(Recognizer recognizer, float sampleRate, IOnAudioDataReceived onAudioDataReceivedCallback) throws IOException {
         this.recognizer = recognizer;
         this.sampleRate = (int) sampleRate;
+        this.onAudioDataReceivedCallback = onAudioDataReceivedCallback;
 
         bufferSize = Math.round(this.sampleRate * BUFFER_SIZE_SECONDS);
         recorder = new AudioRecord(
@@ -197,6 +199,7 @@ public class SpeechService {
             while (!interrupted()
                     && ((timeoutSamples == NO_TIMEOUT) || (remainingSamples > 0))) {
                 int nread = recorder.read(buffer, 0, buffer.length);
+                if(onAudioDataReceivedCallback != null)onAudioDataReceivedCallback.onReceive(buffer);
 
                 if (paused) {
                     continue;
@@ -231,5 +234,9 @@ public class SpeechService {
             }
 
         }
+    }
+
+    public interface IOnAudioDataReceived{
+        public void onReceive(short buffer[]);
     }
 }
