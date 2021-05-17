@@ -42,6 +42,7 @@ public class SpeechService {
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     IOnAudioDataReceived onAudioDataReceivedCallback;
+    private int mAudioRecordBufferSize;
 
     /**
      * Creates speech service. Service holds the AudioRecord object, so you
@@ -54,11 +55,13 @@ public class SpeechService {
         this.sampleRate = (int) sampleRate;
         this.onAudioDataReceivedCallback = onAudioDataReceivedCallback;
 
+
         bufferSize = Math.round(this.sampleRate * BUFFER_SIZE_SECONDS);
+        this.mAudioRecordBufferSize = bufferSize * 2;
         recorder = new AudioRecord(
                 AudioSource.VOICE_RECOGNITION, this.sampleRate,
                 AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT, bufferSize * 2);
+                AudioFormat.ENCODING_PCM_16BIT, mAudioRecordBufferSize);
 
         if (recorder.getState() == AudioRecord.STATE_UNINITIALIZED) {
             recorder.release();
@@ -67,6 +70,9 @@ public class SpeechService {
         }
     }
 
+    public int getmAudioRecordBufferSize() {
+        return mAudioRecordBufferSize;
+    }
 
     /**
      * Starts recognition. Does nothing if recognition is active.
