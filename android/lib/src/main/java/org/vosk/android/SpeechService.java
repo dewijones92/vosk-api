@@ -37,6 +37,7 @@ public class SpeechService {
     private final static float BUFFER_SIZE_SECONDS = 0.2f;
     private final int bufferSize;
     private final AudioRecord recorder;
+    private volatile boolean isDestroyed = false;
 
     private RecognizerThread recognizerThread;
 
@@ -153,8 +154,10 @@ public class SpeechService {
         recorder.release();
     }
     public void destory() {
+        isDestroyed = true;
         this.shutdown();
         recognizerThread.interrupt();
+
     }
 
 
@@ -235,6 +238,7 @@ public class SpeechService {
                     remainingSamples = remainingSamples - nread;
                 }
             }
+            if(isDestroyed) return;
 
             recorder.stop();
 
