@@ -152,6 +152,12 @@ public class SpeechService {
     public void shutdown() {
         recorder.release();
     }
+    public void destory() {
+        this.shutdown();
+        recognizerThread.interrupt();
+    }
+
+
 
     public void setPause(boolean paused) {
         if (recognizerThread != null) {
