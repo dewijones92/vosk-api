@@ -161,6 +161,11 @@ public class SpeechService {
     }
 
 
+    public boolean isShutdown(){
+        return isDestroyed || isShutdown();
+    }
+
+
 
     public void setPause(boolean paused) {
         if (recognizerThread != null) {
@@ -202,6 +207,7 @@ public class SpeechService {
 
         @Override
         public void run() {
+            if(isShutdown()) return;
 
             recorder.startRecording();
             if (recorder.getRecordingState() == AudioRecord.RECORDSTATE_STOPPED) {
@@ -215,6 +221,7 @@ public class SpeechService {
 
             while (!interrupted()
                     && ((timeoutSamples == NO_TIMEOUT) || (remainingSamples > 0))) {
+                if(isShutdown()) return;
                 int nread = recorder.read(buffer, 0, buffer.length);
                 if(onAudioDataReceivedCallback != null)onAudioDataReceivedCallback.onReceive(buffer);
                 if(!mTurnOnRecognizer) continue;
@@ -238,7 +245,7 @@ public class SpeechService {
                     remainingSamples = remainingSamples - nread;
                 }
             }
-            if(isDestroyed) return;
+            if(isShutdown()) return;
 
             recorder.stop();
 
